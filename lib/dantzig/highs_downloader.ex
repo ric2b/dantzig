@@ -16,7 +16,22 @@ defmodule Dantzig.HiGHSDownloader do
     if default_binary_path == binary_path do
       # The user hasn't specified a custom path;
       # We'll download the binary if appropriate.
-      :ok # Temporary
+      case {File.exists?(binary_path), downloaded_version == highs_version} do
+        {true, true} ->
+          # The binary exists and the version matches the one given by the user;
+          # Do nothing
+          :ok
+
+        {false, true} ->
+          # For some reason, we have a version file but not a binary.
+          # Download the binary again
+          download_for_target(highs_version, target())
+
+        {_, false} ->
+          # The current version doesn't match the one given by the user.
+          # Download the binary again and write a new version number
+          download_for_target(highs_version, target())
+      end
     else
       # Do nothing
       :ok
@@ -172,5 +187,6 @@ defmodule Dantzig.HiGHSDownloader do
     end
   end
 end
+
 
 
